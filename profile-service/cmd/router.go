@@ -22,9 +22,9 @@ func router(handler *handler.Handler) *mux.Router {
 	router.HandleFunc("/api/profile/{profile_code}", handler.ProfileUpdate).Methods(http.MethodPut) // update
 
 	// PHOTO
-	router.HandleFunc("/api/photo/{profile_code}", kosongan).Methods(http.MethodGet)    // download
-	router.HandleFunc("/api/photo/{profile_code}", kosongan).Methods(http.MethodPut)    // upload
-	router.HandleFunc("/api/photo/{profile_code}", kosongan).Methods(http.MethodDelete) // delete
+	router.HandleFunc("/api/photo/{profile_code}", handler.DownloadPhoto).Methods(http.MethodGet)  // download
+	router.HandleFunc("/api/photo/{profile_code}", handler.UploadPhoto).Methods(http.MethodPut)    // upload
+	router.HandleFunc("/api/photo/{profile_code}", handler.DeletePhoto).Methods(http.MethodDelete) // delete
 
 	// WORKING EXPERIENCE
 	router.HandleFunc("/api/working-experience/{profile_code}", kosongan).Methods(http.MethodGet) // read
