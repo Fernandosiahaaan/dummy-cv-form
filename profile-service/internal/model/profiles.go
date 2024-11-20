@@ -21,7 +21,7 @@ type Profile struct {
 	PlaceOfBirth   string     `json:"placeOfBirth"        db:"place_of_birth"`
 	DateOfBirth    string     `json:"dateOfBirth"         db:"date_of_birth"`
 	PhotoURL       string     `json:"photoUrl"            db:"photo_url"`
-	CreatedAt      time.Time  `json:"createdAt"           db:"created_at"`
-	UpdatedAt      time.Time  `json:"updatedAt"           db:"updated_at"`
-	DeletedAt      *time.Time `json:"deletedAt,omitempty" db:"deleted_at"` // default null
+	CreatedAt      time.Time  `json:"-"                   db:"created_at"`
+	UpdatedAt      time.Time  `json:"-"                   db:"updated_at"`
+	DeletedAt      *time.Time `json:"-,omitempty"         db:"deleted_at"` // default null
 }

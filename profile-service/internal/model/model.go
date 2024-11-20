@@ -4,11 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
-)
-
-var (
-	SessionTime = 1 * time.Hour
 )
 
 type Response struct {

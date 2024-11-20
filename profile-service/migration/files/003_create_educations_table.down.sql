@@ -1,1 +1,1 @@
-DELETE TABLE IF EXISTS educations;
+DROP TABLE IF EXISTS educations;

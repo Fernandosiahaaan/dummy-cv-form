@@ -8,8 +8,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func kosongan(w http.ResponseWriter, r *http.Request) {}
-
 func router(handler *handler.Handler) *mux.Router {
 	router := mux.NewRouter()
 	router.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
@@ -27,22 +25,24 @@ func router(handler *handler.Handler) *mux.Router {
 	router.HandleFunc("/api/photo/{profile_code}", handler.DeletePhoto).Methods(http.MethodDelete) // delete
 
 	// WORKING EXPERIENCE
-	router.HandleFunc("/api/working-experience/{profile_code}", kosongan).Methods(http.MethodGet) // read
-	router.HandleFunc("/api/working-experience/{profile_code}", kosongan).Methods(http.MethodPut) // update
+	router.HandleFunc("/api/working-experience/{profile_code}", handler.WorkingExperienceRead).Methods(http.MethodGet)    // read
+	router.HandleFunc("/api/working-experience/{profile_code}", handler.WorkingExperienceCreate).Methods(http.MethodPost) // create
+	router.HandleFunc("/api/working-experience/{profile_code}", handler.WorkingExperienceUpdate).Methods(http.MethodPut)  // create
 
 	// EMPLOYMENT
-	router.HandleFunc("/api/employment/{profile_code}", kosongan).Methods(http.MethodGet)    // read
-	router.HandleFunc("/api/employment/{profile_code}", kosongan).Methods(http.MethodPost)   // create
-	router.HandleFunc("/api/employment/{profile_code}", kosongan).Methods(http.MethodDelete) // delete
+	router.HandleFunc("/api/employment/{profile_code}", handler.EmploymentsRead).Methods(http.MethodGet)     // read
+	router.HandleFunc("/api/employment/{profile_code}", handler.EmploymentCreate).Methods(http.MethodPost)   // create
+	router.HandleFunc("/api/employment/{profile_code}", handler.EmploymentDelete).Methods(http.MethodDelete) // delete
 
 	// EDUCATION
-	router.HandleFunc("/api/education/{profile_code}", kosongan).Methods(http.MethodGet)    // read
-	router.HandleFunc("/api/education/{profile_code}", kosongan).Methods(http.MethodPost)   // create
-	router.HandleFunc("/api/education/{profile_code}", kosongan).Methods(http.MethodDelete) // delete
+	router.HandleFunc("/api/education/{profile_code}", handler.EducationsRead).Methods(http.MethodGet)     // read
+	router.HandleFunc("/api/education/{profile_code}", handler.EducationCreate).Methods(http.MethodPost)   // create
+	router.HandleFunc("/api/education/{profile_code}", handler.EducationDelete).Methods(http.MethodDelete) // delete
 
 	// SKILL
-	router.HandleFunc("/api/skill/{profile_code}", kosongan).Methods(http.MethodPost)   // create
-	router.HandleFunc("/api/skill/{profile_code}", kosongan).Methods(http.MethodDelete) // delete
+	router.HandleFunc("/api/skill/{profile_code}", handler.SkillsRead).Methods(http.MethodGet)     // read
+	router.HandleFunc("/api/skill/{profile_code}", handler.SkillCreate).Methods(http.MethodPost)   // create
+	router.HandleFunc("/api/skill/{profile_code}", handler.SkillDelete).Methods(http.MethodDelete) // delete
 
 	return router
 }

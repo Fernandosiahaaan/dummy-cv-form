@@ -10,7 +10,13 @@ import (
 )
 
 const (
-	PrefixKeyProfiles = "profiles"
+	sessionTime = 1 * time.Hour
+
+	PrefixKeyProfiles        = "profiles"
+	PrefixKeyEmployments     = "employments"
+	PrefixKeyEducations      = "educations"
+	PrefixKeySkills          = "skills"
+	PrefixKeyWorkExperiences = "work_experiences"
 )
 
 type Redis struct {

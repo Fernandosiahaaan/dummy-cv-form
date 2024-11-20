@@ -29,6 +29,7 @@ func (h *Handler) ProfileRead(w http.ResponseWriter, r *http.Request) {
 		model.CreateResponseHttp(w, r, http.StatusNotFound, model.Response{Error: true, Message: fmt.Sprintf("not found profile with profile_code '%d' from db", profileCode)})
 		return
 	}
+
 	model.CreateResponseHttp(w, r, http.StatusOK, model.Response{Error: false, Message: fmt.Sprintf("Read profile code %d", profileCode), Data: profile})
 }
 

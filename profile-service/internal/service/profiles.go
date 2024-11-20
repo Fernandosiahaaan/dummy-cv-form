@@ -2,14 +2,15 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"profiles-service/internal/model"
 	"time"
 )
 
 func (s *Service) GetProfile(profile_code int64) (*model.Profile, error) {
-	taskInfo, err := s.redis.GetProfileFromRedis(profile_code)
-	if (err == nil) && (taskInfo != nil) {
-		return taskInfo, nil
+	profileInfo, err := s.redis.GetProfileFromRedis(profile_code)
+	if (err == nil) && (profileInfo != nil) {
+		return profileInfo, nil
 	}
 
 	existProfile, err := s.repo.GetProfileByCode(profile_code)
@@ -28,9 +29,6 @@ func (s *Service) CreateNewProfile(profile *model.Profile) (int64, error) {
 	if existProfile != nil {
 		return 0, errors.New("profile already created")
 	}
-	profile.CreatedAt = time.Now()
-	profile.UpdatedAt = time.Now()
-	profile.DeletedAt = nil
 
 	profile.ProfileCode, err = s.repo.CreateNewProfile(profile)
 	if err != nil {
@@ -44,11 +42,11 @@ func (s *Service) CreateNewProfile(profile *model.Profile) (int64, error) {
 }
 
 func (s *Service) UpdateProfile(profile_code int64, profile *model.Profile) (*int64, error) {
-	existProfile, err := s.repo.GetProfileByCode(profile.ProfileCode)
+	existProfile, err := s.GetProfile(profile_code)
 	if err != nil {
 		return nil, err
 	} else if existProfile == nil {
-		return nil, errors.New("profile not found")
+		return nil, fmt.Errorf("not exist profile")
 	}
 
 	profile.UpdatedAt = time.Now()

@@ -1,1 +1,1 @@
-DELETE TABLE IF EXISTS working_experiences;
+DROP TABLE IF EXISTS working_experiences;

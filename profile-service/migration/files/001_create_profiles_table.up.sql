@@ -1,4 +1,4 @@
-CREATE TABLE profiles (
+CREATE TABLE IF NOT EXISTS profiles (
     profile_code BIGSERIAL PRIMARY KEY,
     wanted_job_title VARCHAR(255),
     first_name VARCHAR(100),

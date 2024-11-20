@@ -12,7 +12,6 @@ func (r *Repository) CreateNewProfile(profile *model.Profile) (int64, error) {
 	ctx, cancel := context.WithTimeout(r.Ctx, defaultTimeoutQuery)
 	defer cancel()
 
-	// insert a new profile
 	query := `
 		INSERT INTO profiles (
 			wanted_job_title, 
@@ -34,7 +33,7 @@ func (r *Repository) CreateNewProfile(profile *model.Profile) (int64, error) {
 			deleted_at
 		) 
 		VALUES (
-			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
+			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL
 		)
 		RETURNING profile_code
 		;
