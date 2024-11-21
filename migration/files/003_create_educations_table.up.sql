@@ -9,8 +9,8 @@ CREATE TABLE IF NOT EXISTS educations (
     description TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP NULL,
-    FOREIGN KEY (profile_code) REFERENCES profiles (profile_code)
+    deleted_at TIMESTAMP NULL
+    -- FOREIGN KEY (profile_code) REFERENCES profiles (profile_code) --
 );
 
 CREATE INDEX IF NOT EXISTS idx_profile_code ON educations (profile_code);

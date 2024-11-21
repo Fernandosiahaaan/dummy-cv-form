@@ -39,6 +39,34 @@ func (r *Repository) CreateNewSkill(skill *model.Skill) (int64, error) {
 	return skillID, nil
 }
 
+func (r *Repository) GetSkillByID(id int64) (*model.Skill, error) {
+	ctx, cancel := context.WithTimeout(r.Ctx, defaultTimeoutQuery)
+	defer cancel()
+
+	query := `
+		SELECT id, profile_code, skill, level, created_at, updated_at, deleted_at
+		FROM skills
+		WHERE id = $1 AND deleted_at IS NULL
+		;
+	`
+
+	skill := &model.Skill{}
+	err := r.DB.QueryRowContext(ctx, query, id).Scan(
+		&skill.ID,
+		&skill.ProfileCode,
+		&skill.Skill,
+		&skill.Level,
+		&skill.CreatedAt,
+		&skill.UpdatedAt,
+		&skill.DeletedAt,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get skill by ID %d. err: %w", id, err)
+	}
+
+	return skill, nil
+}
+
 func (r *Repository) GetSkillsByProfileCode(profileCode int64) ([]*model.Skill, error) {
 	ctx, cancel := context.WithTimeout(r.Ctx, defaultTimeoutQuery)
 	defer cancel()

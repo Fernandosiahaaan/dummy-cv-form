@@ -121,6 +121,65 @@ func (r *Repository) GetProfileByCode(profileCode int64) (*model.Profile, error)
 	return &profile, nil
 }
 
+func (r *Repository) GetProfileByEmail(email string) (*model.Profile, error) {
+	ctx, cancel := context.WithTimeout(r.Ctx, defaultTimeoutQuery)
+	defer cancel()
+
+	var profile model.Profile
+	query := `
+		SELECT 
+			profile_code,
+			wanted_job_title, 
+			first_name, 
+			last_name, 
+			email, 
+			phone, 
+			country, 
+			city, 
+			address, 
+			postal_code, 
+			driving_license,  
+			nationality, 
+			place_of_birth, 
+			date_of_birth, 
+			photo_url, 
+			created_at, 
+			updated_at, 
+			deleted_at
+		FROM profiles
+		WHERE email = $1 AND deleted_at IS NULL
+		;
+	`
+	err := r.DB.QueryRowContext(ctx, query, email).Scan(
+		&profile.ProfileCode,
+		&profile.WantedJobTitle,
+		&profile.FirstName,
+		&profile.LastName,
+		&profile.Email,
+		&profile.Phone,
+		&profile.Country,
+		&profile.City,
+		&profile.Address,
+		&profile.PostalCode,
+		&profile.DrivingLicense,
+		&profile.Nationality,
+		&profile.PlaceOfBirth,
+		&profile.DateOfBirth,
+		&profile.PhotoURL,
+		&profile.CreatedAt,
+		&profile.UpdatedAt,
+		&profile.DeletedAt,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &profile, nil
+}
+
 func (r *Repository) UpdateProfileByCode(profileCode int64, profile *model.Profile) error {
 	ctx, cancel := context.WithTimeout(r.Ctx, defaultTimeoutQuery)
 	defer cancel()

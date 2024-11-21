@@ -18,13 +18,13 @@ func (h *Handler) UploadPhoto(w http.ResponseWriter, r *http.Request) {
 
 	profileCodeInt, err := strconv.Atoi(vars["profile_code"])
 	if err != nil {
-		model.CreateResponseHttp(w, r, http.StatusInternalServerError, model.ResponseBasic{Error: true, Message: "failed convert profile code"})
+		model.CreateResponseHttp(w, r, http.StatusInternalServerError, model.ResponseBasic{Error: true, Message: model.ErrParseProfileCode})
 		return
 	}
 	profileCode := int64(profileCodeInt)
 
 	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
-		model.CreateResponseHttp(w, r, http.StatusBadRequest, model.ResponseBasic{Error: true, Message: "Invalid request body"})
+		model.CreateResponseHttp(w, r, http.StatusBadRequest, model.ResponseBasic{Error: true, Message: model.ErrParseJson})
 		return
 	}
 
@@ -34,13 +34,17 @@ func (h *Handler) UploadPhoto(w http.ResponseWriter, r *http.Request) {
 		model.CreateResponseHttp(w, r, http.StatusInternalServerError, model.ResponseBasic{Error: true, Message: "Failed to decode base64 image"})
 		return
 	}
+
 	photoURL, err := h.service.SavePhoto(profileCode, imgData)
 	if err != nil {
-		model.CreateResponseHttp(w, r, http.StatusInternalServerError, model.ResponseBasic{Error: true, Message: err.Error()})
+		statusCode := http.StatusInternalServerError
+		if strings.HasPrefix(err.Error(), model.ProfileCodeErr01) {
+			statusCode = http.StatusNotFound
+		}
+		model.CreateResponseHttp(w, r, statusCode, model.ResponseBasic{Error: true, Message: err.Error()})
 		return
 	}
 
-	// Respond with the uploaded photo URL
 	response := model.BodyUploadResponse{
 		ProfileCode: profileCode,
 		PhotoURL:    photoURL,
@@ -52,14 +56,22 @@ func (h *Handler) DownloadPhoto(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	profileCodeInt, err := strconv.Atoi(vars["profile_code"])
 	if err != nil {
-		model.CreateResponseHttp(w, r, http.StatusInternalServerError, model.ResponseBasic{Error: true, Message: "failed convert profile code"})
+		w.Header().Set("Content-Type", "application/json")
+		model.CreateResponseHttp(w, r, http.StatusInternalServerError, model.ResponseBasic{Error: true, Message: model.ErrParseProfileCode})
 		return
 	}
 	profileCode := int64(profileCodeInt)
 
 	responseBody, err := h.service.StorePhoto(profileCode)
 	if err != nil {
-		model.CreateResponseHttp(w, r, http.StatusInternalServerError, model.ResponseBasic{Error: true, Message: err.Error()})
+		w.Header().Set("Content-Type", "application/json")
+		statusCode := http.StatusInternalServerError
+
+		if strings.HasPrefix(err.Error(), model.ProfileCodeErr01) || strings.HasPrefix(err.Error(), model.PhotoErr01) {
+			statusCode = http.StatusNotFound
+		}
+		model.CreateResponseHttp(w, r, statusCode, model.ResponseBasic{Error: true, Message: err.Error()})
+		return
 	}
 
 	w.Header().Set("Content-Type", "image/png")
@@ -71,13 +83,18 @@ func (h *Handler) DeletePhoto(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	profileCodeInt, err := strconv.Atoi(vars["profile_code"])
 	if err != nil {
-		model.CreateResponseHttp(w, r, http.StatusInternalServerError, model.ResponseBasic{Error: true, Message: "failed convert profile code"})
+		model.CreateResponseHttp(w, r, http.StatusInternalServerError, model.ResponseBasic{Error: true, Message: model.ErrParseProfileCode})
 		return
 	}
 	profileCode := int64(profileCodeInt)
 	responseBody, err := h.service.DeletePhoto(profileCode)
 	if err != nil {
-		model.CreateResponseHttp(w, r, http.StatusInternalServerError, model.ResponseBasic{Error: true, Message: err.Error()})
+		statusCode := http.StatusInternalServerError
+
+		if strings.HasPrefix(err.Error(), model.ProfileCodeErr01) || strings.HasPrefix(err.Error(), model.PhotoErr01) {
+			statusCode = http.StatusNotFound
+		}
+		model.CreateResponseHttp(w, r, statusCode, model.ResponseBasic{Error: true, Message: err.Error()})
 		return
 	}
 

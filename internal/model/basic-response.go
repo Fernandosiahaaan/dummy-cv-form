@@ -21,11 +21,15 @@ type OnlyProfileCodeResponse struct {
 	ProfileCode int64 `json:"profileCode"`
 }
 
+type OnlyDataResponse struct {
+	Data any `json:"data"`
+}
+
 func CreateResponseHttp(w http.ResponseWriter, r *http.Request, statusCode int, response ResponseBasic) {
 	w.WriteHeader(statusCode)
 	if response.Error {
 		json.NewEncoder(w).Encode(response)
-		fmt.Printf("❌  [%s] uri = '%s'; status code = %d; message = %s\n", r.Method, r.RequestURI, statusCode, response.Message)
+		fmt.Printf("❌  [%s] uri = '%s'; status code = %d; message = %s\n", r.Method, r.RequestURI, statusCode, response.Data)
 		return
 	}
 

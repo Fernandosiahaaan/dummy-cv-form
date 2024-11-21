@@ -11,7 +11,6 @@ func (r *Repository) CreateNewEmployment(emp *model.Employment) (int64, error) {
 	ctx, cancel := context.WithTimeout(r.Ctx, defaultTimeoutQuery)
 	defer cancel()
 
-	// insert a new employment
 	query := `
 		INSERT INTO employments (
 			profile_code, 
@@ -132,7 +131,6 @@ func (r *Repository) SoftDeleteEmployment(id int64) error {
 	ctx, cancel := context.WithTimeout(r.Ctx, defaultTimeoutQuery)
 	defer cancel()
 
-	// update deleted_at to perform a soft delete
 	query := `
 		UPDATE employments
 		SET deleted_at = CURRENT_TIMESTAMP

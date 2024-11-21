@@ -83,7 +83,6 @@ func (r *Repository) GetEducationsByProfileCode(profileCode int64) ([]*model.Edu
 	ctx, cancel := context.WithTimeout(r.Ctx, defaultTimeoutQuery)
 	defer cancel()
 
-	// Query untuk mengambil data pendidikan berdasarkan profile_code
 	query := `
 		SELECT id, profile_code, school, degree, start_date, end_date, city, description, created_at, updated_at, deleted_at
 		FROM educations
@@ -120,7 +119,6 @@ func (r *Repository) GetEducationsByProfileCode(profileCode int64) ([]*model.Edu
 		educations = append(educations, education)
 	}
 
-	// Cek apakah ada error saat iterasi
 	if err = rows.Err(); err != nil {
 		return nil, fmt.Errorf("failed to iterate over education rows. err: %w", err)
 	}

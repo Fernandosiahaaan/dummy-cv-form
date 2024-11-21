@@ -23,6 +23,9 @@ func (s *Service) SavePhoto(profileCode int64, imageData []byte) (string, error)
 	profile, err := s.GetProfile(profileCode)
 	if err != nil {
 		return photoURL, err
+
+	} else if profile == nil {
+		return "", fmt.Errorf("%s%d", model.ProfileCodeErr01, profileCode)
 	}
 	profile.PhotoURL = photoURL
 
@@ -38,10 +41,13 @@ func (s *Service) StorePhoto(profileCode int64) (*model.BodyDownloadResponse, er
 	profile, err := s.GetProfile(profileCode)
 	if err != nil {
 		return nil, err
+
+	} else if profile == nil {
+		return nil, fmt.Errorf("%s%d", model.ProfileCodeErr01, profileCode)
 	}
 
 	if profile.PhotoURL == "" {
-		return nil, fmt.Errorf("photo with profile_code %d not exist", profileCode)
+		return nil, fmt.Errorf("%s%d", model.PhotoErr01, profileCode)
 	}
 
 	filePath := fmt.Sprintf("%s/%d.png", model.DirStaticUploadFolder, profileCode)
@@ -57,21 +63,27 @@ func (s *Service) StorePhoto(profileCode int64) (*model.BodyDownloadResponse, er
 }
 
 func (s *Service) DeletePhoto(profileCode int64) (*model.OnlyProfileCodeResponse, error) {
-	filePath := fmt.Sprintf("%s/%d.png", model.DirStaticUploadFolder, profileCode)
+	// check profile code from db
+	profile, err := s.GetProfile(profileCode)
+	if err != nil {
+		return nil, err
 
+	} else if profile == nil {
+		return nil, fmt.Errorf("%s%d", model.ProfileCodeErr01, profileCode)
+	}
+
+	if profile.PhotoURL == "" {
+		return nil, fmt.Errorf("%s%d", model.PhotoErr01, profileCode)
+	}
+
+	filePath := fmt.Sprintf("%s/%d.png", model.DirStaticUploadFolder, profileCode)
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		return nil, fmt.Errorf("file not found. err : %v", err)
 	}
 
-	// Hapus file
-	err := os.Remove(filePath)
+	err = os.Remove(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to delete image. err : %v", err)
-	}
-
-	profile, err := s.GetProfile(profileCode)
-	if err != nil {
-		return nil, err
 	}
 
 	profile.PhotoURL = ""

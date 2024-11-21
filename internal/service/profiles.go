@@ -2,32 +2,35 @@ package service
 
 import (
 	"dummy-cv-form/internal/model"
-	"errors"
 	"fmt"
 	"time"
 )
 
-func (s *Service) GetProfile(profile_code int64) (*model.Profile, error) {
-	profileInfo, err := s.redis.GetProfileFromRedis(profile_code)
+func (s *Service) GetProfile(profileCode int64) (*model.Profile, error) {
+	profileInfo, err := s.redis.GetProfileFromRedis(profileCode)
 	if (err == nil) && (profileInfo != nil) {
 		return profileInfo, nil
 	}
 
-	existProfile, err := s.repo.GetProfileByCode(profile_code)
+	existProfile, err := s.repo.GetProfileByCode(profileCode)
 	if err != nil {
 		return nil, err
+	} else if existProfile == nil {
+		return nil, fmt.Errorf("%s%d", model.ProfileCodeErr01, profileCode)
 	}
+
+	if err = s.redis.SetProfileToRedis(existProfile); err != nil {
+		fmt.Printf("failed set to redis data profiles with code %d\n", existProfile.ProfileCode)
+	}
+
 	return existProfile, nil
 }
 
 func (s *Service) CreateNewProfile(profile *model.Profile) (int64, error) {
-	existProfile, err := s.repo.GetProfileByCode(profile.ProfileCode)
-	if err != nil {
-		return 0, err
-	}
-
+	var err error
+	existProfile, _ := s.repo.GetProfileByEmail(profile.Email)
 	if existProfile != nil {
-		return 0, errors.New("profile already created")
+		return 0, fmt.Errorf("%s%d", model.ProfileCodeErr02, existProfile.ProfileCode)
 	}
 
 	profile.ProfileCode, err = s.repo.CreateNewProfile(profile)
@@ -41,23 +44,24 @@ func (s *Service) CreateNewProfile(profile *model.Profile) (int64, error) {
 	return profile.ProfileCode, nil
 }
 
-func (s *Service) UpdateProfile(profile_code int64, profile *model.Profile) (*int64, error) {
-	existProfile, err := s.GetProfile(profile_code)
+func (s *Service) UpdateProfile(profileCode int64, profile *model.Profile) (*int64, error) {
+	existProfile, err := s.GetProfile(profileCode)
 	if err != nil {
 		return nil, err
+
 	} else if existProfile == nil {
-		return nil, fmt.Errorf("not exist profile")
+		return nil, fmt.Errorf("%s%d", model.ProfileCodeErr01, profileCode)
 	}
 
 	profile.UpdatedAt = time.Now()
-	err = s.repo.UpdateProfileByCode(profile_code, profile)
+	err = s.repo.UpdateProfileByCode(profileCode, profile)
 	if err != nil {
 		return nil, err
 	}
 
-	profile.ProfileCode = profile_code
+	profile.ProfileCode = profileCode
 	if err = s.redis.SetProfileToRedis(profile); err != nil {
 		return nil, err
 	}
-	return &profile_code, nil
+	return &profileCode, nil
 }

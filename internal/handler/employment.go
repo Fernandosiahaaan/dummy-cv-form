@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -17,20 +18,22 @@ func (h *Handler) EmploymentsRead(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	profileCodeInt, err := strconv.Atoi(vars["profile_code"])
 	if err != nil {
-		model.CreateResponseHttp(w, r, http.StatusInternalServerError, model.ResponseBasic{Error: true, Message: "failed convert profile code"})
+		model.CreateResponseHttp(w, r, http.StatusInternalServerError, model.ResponseBasic{Error: true, Message: model.ErrParseProfileCode})
 	}
 	profileCode := int64(profileCodeInt)
 
-	employments, err := h.service.GetEmployment(profileCode)
+	employments, err := h.service.GetEmployments(profileCode)
 	if err != nil {
-		model.CreateResponseHttp(w, r, http.StatusBadRequest, model.ResponseBasic{Error: true, Message: err.Error()})
-		return
-	} else if employments == nil {
-		model.CreateResponseHttp(w, r, http.StatusNotFound, model.ResponseBasic{Error: true, Message: fmt.Sprintf("not found employments with profile_code '%d' from db", profileCode)})
+		statusCode := http.StatusInternalServerError
+		if strings.HasPrefix(err.Error(), model.ProfileCodeErr01) {
+			statusCode = http.StatusNotFound
+		}
+		model.CreateResponseHttp(w, r, statusCode, model.ResponseBasic{Error: true, Message: err.Error()})
 		return
 	}
 
-	model.CreateResponseHttp(w, r, http.StatusOK, model.ResponseBasic{Error: false, Data: employments})
+	var bodyRespond model.OnlyDataResponse = model.OnlyDataResponse{Data: employments}
+	model.CreateResponseHttp(w, r, http.StatusOK, model.ResponseBasic{Error: false, Data: bodyRespond})
 }
 
 func (h *Handler) EmploymentCreate(w http.ResponseWriter, r *http.Request) {
@@ -41,20 +44,24 @@ func (h *Handler) EmploymentCreate(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	profileCodeInt, err := strconv.Atoi(vars["profile_code"])
 	if err != nil {
-		model.CreateResponseHttp(w, r, http.StatusInternalServerError, model.ResponseBasic{Error: true, Message: "failed convert profile code"})
+		model.CreateResponseHttp(w, r, http.StatusInternalServerError, model.ResponseBasic{Error: true, Message: model.ErrParseProfileCode})
 	}
 	profileCode := int64(profileCodeInt)
 
 	if err := json.NewDecoder(r.Body).Decode(&employment); err != nil {
 		fmt.Println(err)
-		model.CreateResponseHttp(w, r, http.StatusBadRequest, model.ResponseBasic{Error: true, Message: "failed parse body request"})
+		model.CreateResponseHttp(w, r, http.StatusBadRequest, model.ResponseBasic{Error: true, Message: model.ErrParseJson})
 		return
 	}
 	employment.ProfileCode = profileCode
 
 	respondEmp, err := h.service.CreateEmployment(&employment)
 	if err != nil {
-		model.CreateResponseHttp(w, r, http.StatusBadRequest, model.ResponseBasic{Error: true, Message: err.Error()})
+		statusCode := http.StatusInternalServerError
+		if strings.HasPrefix(err.Error(), model.ProfileCodeErr01) {
+			statusCode = http.StatusNotFound
+		}
+		model.CreateResponseHttp(w, r, statusCode, model.ResponseBasic{Error: true, Message: err.Error()})
 		return
 	}
 
@@ -62,7 +69,7 @@ func (h *Handler) EmploymentCreate(w http.ResponseWriter, r *http.Request) {
 		ProfileCode: profileCode,
 		ID:          respondEmp.ID,
 	}
-	model.CreateResponseHttp(w, r, http.StatusOK, model.ResponseBasic{Error: false, Data: bodyRespond})
+	model.CreateResponseHttp(w, r, http.StatusCreated, model.ResponseBasic{Error: false, Data: bodyRespond})
 }
 
 func (h *Handler) EmploymentDelete(w http.ResponseWriter, r *http.Request) {
@@ -72,7 +79,7 @@ func (h *Handler) EmploymentDelete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	profileCodeInt, err := strconv.Atoi(vars["profile_code"])
 	if err != nil {
-		model.CreateResponseHttp(w, r, http.StatusInternalServerError, model.ResponseBasic{Error: true, Message: "failed convert profile code"})
+		model.CreateResponseHttp(w, r, http.StatusInternalServerError, model.ResponseBasic{Error: true, Message: model.ErrParseProfileCode})
 	}
 	profileCode := int64(profileCodeInt)
 
@@ -86,7 +93,11 @@ func (h *Handler) EmploymentDelete(w http.ResponseWriter, r *http.Request) {
 
 	err = h.service.DeleteEmployment(idEmployment, profileCode)
 	if err != nil {
-		model.CreateResponseHttp(w, r, http.StatusBadRequest, model.ResponseBasic{Error: true, Message: err.Error()})
+		statusCode := http.StatusInternalServerError
+		if strings.HasPrefix(err.Error(), model.EmploymentErr01) || strings.HasPrefix(err.Error(), model.ProfileCodeErr01) {
+			statusCode = http.StatusNotFound
+		}
+		model.CreateResponseHttp(w, r, statusCode, model.ResponseBasic{Error: true, Message: err.Error()})
 		return
 	}
 

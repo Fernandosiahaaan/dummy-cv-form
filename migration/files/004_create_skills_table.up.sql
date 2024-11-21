@@ -5,8 +5,8 @@ CREATE TABLE IF NOT EXISTS skills (
     level VARCHAR(100) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP NULL,
-    FOREIGN KEY (profile_code) REFERENCES profiles (profile_code)
+    deleted_at TIMESTAMP NULL
+    -- FOREIGN KEY (profile_code) REFERENCES profiles (profile_code) --
 );
 
 CREATE INDEX IF NOT EXISTS idx_profile_code ON skills (profile_code);
