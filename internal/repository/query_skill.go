@@ -21,7 +21,7 @@ func (r *Repository) CreateNewSkill(skill *model.Skill) (int64, error) {
 			deleted_at
 		) 
 		VALUES (
-			$1, $2, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL
+			$1, $2, $3, $4, $5, NULL
 		)
 		RETURNING id
 		;
@@ -31,6 +31,8 @@ func (r *Repository) CreateNewSkill(skill *model.Skill) (int64, error) {
 		skill.ProfileCode,
 		skill.Skill,
 		skill.Level,
+		skill.CreatedAt,
+		skill.UpdatedAt,
 	).Scan(&skillID)
 	if err != nil {
 		return 0, fmt.Errorf("failed to create new skill for profile %d. err: %w", skill.ProfileCode, err)

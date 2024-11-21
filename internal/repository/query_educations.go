@@ -25,7 +25,7 @@ func (r *Repository) CreateNewEducation(edu *model.Education) (int64, error) {
 			deleted_at
 		) 
 		VALUES (
-			$1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL
+			$1, $2, $3, $4, $5, $6, $7, $8, $9, NULL
 		)
 		RETURNING id
 		;
@@ -39,6 +39,8 @@ func (r *Repository) CreateNewEducation(edu *model.Education) (int64, error) {
 		edu.EndDate,
 		edu.City,
 		edu.Description,
+		edu.CreatedAt,
+		edu.UpdatedAt,
 	).Scan(&educationID)
 	if err != nil {
 		return 0, fmt.Errorf("failed to create new education for profile %d. err: %w", edu.ProfileCode, err)

@@ -3,6 +3,7 @@ package service
 import (
 	"dummy-cv-form/internal/model"
 	"fmt"
+	"time"
 )
 
 func (s *Service) GetSkills(profileCode int64) ([]*model.Skill, error) {
@@ -42,6 +43,8 @@ func (s *Service) CreateSkill(skill *model.Skill) (*model.Skill, error) {
 		return nil, fmt.Errorf("%s%d", model.ProfileCodeErr01, skill.ProfileCode)
 	}
 
+	skill.CreatedAt = time.Now()
+	skill.UpdatedAt = time.Now()
 	skill.ID, err = s.repo.CreateNewSkill(skill)
 	if err != nil {
 		return nil, err

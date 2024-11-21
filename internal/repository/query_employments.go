@@ -25,7 +25,7 @@ func (r *Repository) CreateNewEmployment(emp *model.Employment) (int64, error) {
 			deleted_at
 		) 
 		VALUES (
-			$1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL
+			$1, $2, $3, $4, $5, $6, $7, $8, $9, NULL
 		)
 		RETURNING id
 		;
@@ -39,6 +39,8 @@ func (r *Repository) CreateNewEmployment(emp *model.Employment) (int64, error) {
 		emp.EndDate,
 		emp.City,
 		emp.Description,
+		emp.CreatedAt,
+		emp.UpdatedAt,
 	).Scan(&employmentID)
 	if err != nil {
 		return 0, fmt.Errorf("failed to create new employment for profile %d. err: %w", emp.ProfileCode, err)

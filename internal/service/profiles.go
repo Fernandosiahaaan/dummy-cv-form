@@ -33,6 +33,8 @@ func (s *Service) CreateNewProfile(profile *model.Profile) (int64, error) {
 		return 0, fmt.Errorf("%s%d", model.ProfileCodeErr02, existProfile.ProfileCode)
 	}
 
+	profile.CreatedAt = time.Now()
+	profile.UpdatedAt = time.Now()
 	profile.ProfileCode, err = s.repo.CreateNewProfile(profile)
 	if err != nil {
 		return 0, err

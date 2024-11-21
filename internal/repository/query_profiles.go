@@ -33,7 +33,7 @@ func (r *Repository) CreateNewProfile(profile *model.Profile) (int64, error) {
 			deleted_at
 		) 
 		VALUES (
-			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL
+			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NULL
 		)
 		RETURNING profile_code
 		;
@@ -54,6 +54,8 @@ func (r *Repository) CreateNewProfile(profile *model.Profile) (int64, error) {
 		profile.PlaceOfBirth,
 		profile.DateOfBirth,
 		profile.PhotoURL,
+		profile.CreatedAt,
+		profile.UpdatedAt,
 	).Scan(&profileCode)
 	if err != nil {
 		return 0, fmt.Errorf("failed to create new profile with name '%s'. err : %w", profile.FirstName, err)

@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS profiles (
     driving_license VARCHAR(50),
     nationality VARCHAR(100),
     place_of_birth VARCHAR(100),
-    date_of_birth VARCHAR(100) NOT NULL,
+    date_of_birth DATE NOT NULL,
     photo_url VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

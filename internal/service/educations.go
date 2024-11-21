@@ -3,6 +3,7 @@ package service
 import (
 	"dummy-cv-form/internal/model"
 	"fmt"
+	"time"
 )
 
 func (s *Service) GetEducations(profileCode int64) ([]*model.Education, error) {
@@ -42,6 +43,8 @@ func (s *Service) CreateEducation(education *model.Education) (*model.Education,
 		return nil, fmt.Errorf("%s%d", model.ProfileCodeErr01, education.ProfileCode)
 	}
 
+	education.CreatedAt = time.Now()
+	education.UpdatedAt = time.Now()
 	education.ID, err = s.repo.CreateNewEducation(education)
 	if err != nil {
 		return nil, err

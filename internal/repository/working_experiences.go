@@ -19,13 +19,13 @@ func (r *Repository) CreateNewWorkingExperience(workingExperience *model.Working
 			updated_at,
 			deleted_at
 		)
-		VALUES ($1, $2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL)
+		VALUES ($1, $2, $3, $4, NULL)
 		RETURNING id
 		;
 	`
 
 	var id int64
-	err := r.DB.QueryRowContext(ctx, query, workingExperience.ProfileCode, workingExperience.Experience).Scan(&id)
+	err := r.DB.QueryRowContext(ctx, query, workingExperience.ProfileCode, workingExperience.Experience, workingExperience.CreatedAt, workingExperience.UpdatedAt).Scan(&id)
 	if err != nil {
 		return 0, fmt.Errorf("failed to create new working experience. err: %w", err)
 	}
@@ -78,12 +78,12 @@ func (r *Repository) UpdateWorkingExperienceByProfileCode(workingExperience *mod
 		UPDATE working_experiences
 		SET 
 			experience = $1, 
-			updated_at = CURRENT_TIMESTAMP
-		WHERE profile_code = $2 AND deleted_at IS NULL
+			updated_at = $2
+		WHERE profile_code = $3 AND deleted_at IS NULL
 		RETURNING id, experience, updated_at;
 	`
 
-	err := r.DB.QueryRowContext(ctx, query, workingExperience.Experience, workingExperience.ProfileCode).
+	err := r.DB.QueryRowContext(ctx, query, workingExperience.Experience, workingExperience.UpdatedAt, workingExperience.ProfileCode).
 		Scan(&workingExperience.ID, &workingExperience.Experience, &workingExperience.UpdatedAt)
 	if err != nil {
 		return fmt.Errorf("failed to update working experience with id %d. err: %w", workingExperience.ID, err)
